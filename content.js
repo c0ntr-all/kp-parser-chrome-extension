@@ -1,27 +1,30 @@
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "parsePage") {
-
         const results = [];
-        const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-        const links = document.querySelectorAll('a');
+        const container = document.getElementById('itemList')
+        const items = container.querySelectorAll('.item')
+        Array.from(items).forEach(element => {
+            const info = element.querySelector('.info')
+            const etc = element.querySelector('.etc')
+            const images = element.querySelector('.images')
 
-        headings.forEach((heading, index) => {
-            results.push({
-                type: 'heading',
-                level: heading.tagName,
-                text: heading.textContent.trim(),
-                index: index
-            });
-        });
+            const id = element.getAttribute('data-id')
+            const removeElement = element.querySelector('.remove');
+            const datetimeSpan = removeElement.nextElementSibling;
+            const datetime = datetimeSpan && datetimeSpan.tagName === 'SPAN' ? datetimeSpan.innerText : 'no datetime'
+            const result= {
+                id: id,
+                title: info.querySelector('.name').innerText,
+                datetime: datetime,
+                image: images.querySelector('.flap_img').getAttribute('title'),
+                estimation: etc.querySelector(`.show_vote_${id}`).innerText,
+                kp_estimation: etc.querySelector('.kpRating').innerText.split(' ')[0],
+            }
 
-        links.forEach((link, index) => {
-            results.push({
-                type: 'link',
-                text: link.textContent.trim(),
-                href: link.href,
-                index: index
-            });
-        });
+            results.push(result)
+        })
+
+        console.log(results)
 
         sendResponse({ data: results });
     }
